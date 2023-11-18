@@ -108,6 +108,7 @@ export default function Home() {
                       <p className={handleStyle}>{profile.handle}</p>
                     </div>
                   </div>
+          
                   <div>
                     <p className={latestPostStyle}>{trimString(profile.publication?.metadata.content, 200)}</p>
                   </div>

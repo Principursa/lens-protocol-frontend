@@ -4,6 +4,7 @@ const nextConfig = {
   images: {
     domains: [
       'ipfs.infura.io',
+      "ik.imagekit.io",
       'statics-polygon-lens-staging.s3.eu-west-1.amazonaws.com',
       'lens.infura-ipfs.io',
       ""
