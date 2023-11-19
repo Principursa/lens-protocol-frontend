@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useState, useEffect, useContext } from "react";
 import { Radar } from "react-chartjs-2";
-import Chart from 'chart.js/auto';
+import Chart from "chart.js/auto";
 
 import axios from "axios";
 
@@ -38,13 +38,16 @@ const data = {
     },
   ],
 };
-var builderScore = data.datasets[0].data.reduce(
-  (accumulator, currentValue) => accumulator + currentValue
-);
 
 export default function Profile() {
+  var builderScore = data.datasets[0].data.reduce(
+    (accumulator, currentValue) => accumulator + currentValue
+  );
+  const [bscore, setBscore] = useState(builderScore)
   const [profile, setProfile] = useState();
-  const url = "http://localhost:8000/mock_data";
+  const [ghoAmt, setghoAmt] = useState("0");
+  const mockDataUrl = "http://localhost:8000/mock_data";
+  const ghoServerUrl = "http://localhost:8000/gho_amount";
 
   const [publications, setPublications] = useState([]);
   const [doesFollow, setDoesFollow] = useState();
@@ -54,11 +57,16 @@ export default function Profile() {
   const { id } = router.query;
   const { userAddress, profile: userProfile } = context;
 
-     async function fetchInfo() {
-     axios
-      .post(url, userAddress)
+  async function fetchMockInfo() {
+    axios
+      .post(mockDataUrl, userAddress)
       .then((response) => (data.datasets[0].data = response.data));
-  }; 
+  }
+  async function fetchGHOInfo() {
+    axios
+      .post(ghoServerUrl, userAddress)
+      .then((response) => setghoAmt(response.data));
+  }
   useEffect(() => {
     if (id) {
       getProfile();
@@ -66,7 +74,8 @@ export default function Profile() {
     if (id && userAddress) {
       checkDoesFollow();
     }
-    fetchInfo();
+    fetchMockInfo();
+    fetchGHOInfo();
   }, [id, userAddress]);
 
   async function unfollow() {
@@ -98,6 +107,7 @@ export default function Profile() {
     try {
       const { profile: profileData, publications: publicationData } =
         await fetchProfile(id);
+      console.log("profileData: ", profileData);
       setProfile(profileData);
       setPublications(publicationData);
       setLoadedState("loaded");
@@ -171,15 +181,16 @@ export default function Profile() {
           <h3 className={nameStyle}>{profile.name}</h3>
           <p className={handleStyle}>{profile.handle}</p>
           <p className={bioStyle}>{profile.bio}</p>
-          <h3 className={nameStyle}>Builder Score:{" " + builderScore}</h3>
+          <h3 className={nameStyle}>Builder Score:{" " + bscore}</h3>
 
           <div>
             <Button
               onClick={() => {
-                return true;
+                setBscore(bscore + 100)
               }}
               buttonText="Endorse"
             />
+            <Button buttonText={"Mint NFT"} />
           </div>
           <div>
             <Radar data={data} />
@@ -201,6 +212,13 @@ export default function Profile() {
                 Edit Profile
               </button>
             )}
+            <div>
+              <h3>Protocol Positions</h3>
+              <div>
+                <h4>Gho:{"160"}</h4>
+                <h4>AAVE Staked: {".3"}</h4>
+              </div>
+            </div>
           </div>
         </div>
         <div className={rightColumnStyle}>
